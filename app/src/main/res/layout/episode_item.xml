@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="96dp">
+    <ImageView
+        android:id="@+id/episode_art"
+        android:layout_margin="8dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/colorPrimary"/>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="96dp">
+        <TextView
+            android:id="@+id/episode_title"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:text="Episode Name"/>
+        <TextView
+            android:id="@+id/episode_details"
+            android:ellipsize="end"
+            android:layout_marginRight="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:maxLines="2"
+            android:text="details..."/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp">
+            <TextView
+                android:id="@+id/episode_date"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Date"/>
+            <TextView
+                android:id="@+id/episode_time"
+                android:gravity="right"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingRight="8dp"
+                android:text="Time"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

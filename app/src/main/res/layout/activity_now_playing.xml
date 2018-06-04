@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NowPlaying"
+    android:orientation="vertical">
+    <ImageView
+        android:id="@+id/art"
+        android:layout_marginTop="64dp"
+        android:layout_marginBottom="32dp"
+        android:layout_gravity="center"
+        android:layout_width="256dp"
+        android:layout_height="256dp"/>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/episode"
+            android:layout_marginRight="32dp"
+            android:layout_marginLeft="32dp"
+            android:textStyle="bold"
+            android:text="Episode"
+            android:textAlignment="center"
+            android:ellipsize="marquee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/podcast"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="32dp"
+            android:layout_marginLeft="32dp"
+            android:textStyle="bold"
+            android:text="Episode"
+            android:textAlignment="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="10">
+            <TextView
+                android:id="@+id/time_elapsed"
+                android:text="0:00"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"/>
+            <SeekBar
+                android:id="@+id/seekbar"
+                android:layout_weight="7"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/time_left"
+                android:text="1:00:00"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"/>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_marginRight="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_height="96dp">
+            <Button
+                android:id="@+id/prev"
+                android:text="|&lt;"
+                android:textAlignment="center"
+                android:textSize="32sp"
+                android:layout_gravity="center"
+                android:layout_width="64dp"
+                android:layout_height="64dp" />
+            <Button
+                android:id="@+id/rw"
+                android:text="&lt;&lt;"
+                android:textAlignment="center"
+                android:textSize="32sp"
+                android:layout_gravity="center"
+                android:layout_width="64dp"
+                android:layout_height="64dp" />
+            <Button
+                android:id="@+id/play"
+                android:text="| |"
+                android:textAlignment="center"
+                android:textSize="32sp"
+                android:layout_gravity="center"
+                android:layout_width="64dp"
+                android:layout_height="64dp" />
+            <Button
+                android:id="@+id/ff"
+                android:text="&gt;&gt;"
+                android:textAlignment="center"
+                android:textSize="32sp"
+                android:layout_gravity="center"
+                android:layout_width="64dp"
+                android:layout_height="64dp" />
+            <Button
+                android:id="@+id/next"
+                android:text="&gt;|"
+                android:textAlignment="center"
+                android:textSize="32sp"
+                android:layout_gravity="center"
+                android:layout_width="64dp"
+                android:layout_height="64dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
