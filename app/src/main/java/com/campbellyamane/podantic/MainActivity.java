@@ -34,10 +34,13 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> feeds;
     private AutoCompleteAdapter adapter;
     private AutoCompleteTextView searchView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //setting lists and views
         results =  new ArrayList<>();
         adapter = new AutoCompleteAdapter (this, android.R.layout.simple_dropdown_item_1line, results);
         searchView = (AutoCompleteTextView) findViewById(R.id.search);
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                //searching iTunes database as long as search is not empty
                 if (s.toString() != "") {
                     new podSearch().execute(s.toString());
                 }
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         });
         searchView.setAdapter(adapter);
 
+        //start single podcast activity on click
         searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -92,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
                 results =  new ArrayList<>();
                 feeds = new ArrayList<>();
                 JSONArray searchResults = json.getJSONArray("results");
+
+                //return top 5 results from iTunes
                 for (int i = 0; i < searchResults.length(); i++){
                     results.add(searchResults.getJSONObject(i).getString("collectionName"));
                     feeds.add(searchResults.getJSONObject(i).getString("feedUrl"));

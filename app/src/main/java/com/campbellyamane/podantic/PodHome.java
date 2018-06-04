@@ -55,10 +55,17 @@ public class PodHome extends AppCompatActivity {
         setContentView(R.layout.activity_pod_home);
         Intent intent = getIntent();
         String feed = intent.getStringExtra("feed");
+
+        //get episodes for podcast
         new podRetrieve().execute(feed);
-        img = (ImageView) findViewById(R.id.podimage);
-        name = (TextView) findViewById(R.id.podinfo);
-        listView = (ListView) findViewById(R.id.episodes);
+
+        {
+            img = (ImageView) findViewById(R.id.podimage);
+            name = (TextView) findViewById(R.id.podinfo);
+            listView = (ListView) findViewById(R.id.episodes);
+        }
+
+        //loading episodes into listview
         episodes = new ArrayList<Episode>();
         adapter = new EpisodeAdapter(this, episodes);
         listView.setAdapter(adapter);
