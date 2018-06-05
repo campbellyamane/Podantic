@@ -1,7 +1,5 @@
 package com.campbellyamane.podantic;
 
-import android.content.Context;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
@@ -16,15 +14,13 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
-import static com.campbellyamane.podantic.MainActivity.serviceBound;
-import static com.campbellyamane.podantic.MainActivity.serviceConnection;
-
-public class NowPlaying extends General {
+public class NowPlaying extends AppCompatActivity {
 
     private ImageView art;
     private TextView title;
     private TextView podcast;
     private Button button;
+    private MediaPlayer mp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,14 +36,42 @@ public class NowPlaying extends General {
         title.setText(extras.getString("episode"));
         podcast.setText(extras.getString("podcast"));
 
-        if (!serviceBound) {
-            Intent playerIntent = new Intent(this, PodcastService.class);
-            startService(playerIntent);
-            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-            player.newTrack(extras.getString("mp3"));
-        } else {
-            //Service is active
-            //Send media with BroadcastReceiver
+
+        mp = new MediaPlayer();
+        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            mp.setDataSource(extras.getString("mp3"));
+            mp.prepareAsync();
+            // You can show progress dialog here until it prepared to play
+            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    // Now dismis progress dialog, Media palyer will start playing
+                    mp.start();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mp.isPlaying()){
+                    mp.pause();
+                    button.setText(">");
+                }
+                else if (!mp.isPlaying()){
+                    mp.start();
+                    button.setText("||");
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mp.stop();
     }
 }

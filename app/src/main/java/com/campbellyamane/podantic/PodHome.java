@@ -42,7 +42,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class PodHome extends General {
+public class PodHome extends AppCompatActivity {
     private ImageView img;
     private TextView name;
     private ListView listView;

@@ -1,11 +1,8 @@
 package com.campbellyamane.podantic;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,7 +28,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends General {
+public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> results;
     private ArrayList<String> feeds;
@@ -101,7 +98,7 @@ public class MainActivity extends General {
                 feeds = new ArrayList<>();
                 JSONArray searchResults = json.getJSONArray("results");
 
-                //return top 5 results from iTunes
+                //return top 5 results from iTunes db
                 for (int i = 0; i < searchResults.length(); i++){
                     results.add(searchResults.getJSONObject(i).getString("collectionName"));
                     feeds.add(searchResults.getJSONObject(i).getString("feedUrl"));
