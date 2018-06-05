@@ -3,6 +3,7 @@ package com.campbellyamane.podantic;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -28,12 +29,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends General {
 
     private ArrayList<String> results;
     private ArrayList<String> feeds;
     private AutoCompleteAdapter adapter;
     private AutoCompleteTextView searchView;
+    private AsyncTask ps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 //searching iTunes database as long as search is not empty
                 if (s.toString() != "") {
-                    new podSearch().execute(s.toString());
+                    ps = new podSearch().execute(s.toString());
                 }
 
             }
@@ -82,9 +84,9 @@ public class MainActivity extends AppCompatActivity {
         String url1 = "https://itunes.apple.com/search?entity=podcast&limit=5&sort=popularity&term=";
         String mp3 = "";
         String title = "";
-
         @Override
         protected String doInBackground(String... query) {
+            Log.d("PodAntic","async");
             URL url = null;
             String search = query[0].replace("&", "");
             search = search.replace("+", "");
@@ -127,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String t) {
             adapter.update(results);
-
         }
 
         public JSONObject getObject(InputStreamReader in) throws IOException, JSONException {
@@ -143,5 +144,11 @@ public class MainActivity extends AppCompatActivity {
             JSONObject result= new JSONObject(responseStrBuilder.toString());
             return result;
         }
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        ps.cancel(true);
     }
 }

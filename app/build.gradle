@@ -10,18 +10,6 @@ android {
         versionName "3.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    sourceSets {
-        main {
-            java {
-                exclude '**/PodcastService.java'
-            }
-        }
-        androidTest {
-            java {
-                exclude '**/PodcastService.java'
-            }
-        }
-    }
     buildTypes {
         release {
             minifyEnabled false

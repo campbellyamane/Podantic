@@ -14,64 +14,59 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
-public class NowPlaying extends AppCompatActivity {
+public class NowPlaying extends General {
 
     private ImageView art;
     private TextView title;
     private TextView podcast;
-    private Button button;
+    private Button playButton;
+    private Button rwButton;
+    private Button ffButton;
     private MediaPlayer mp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_now_playing);
-        Bundle extras = getIntent().getExtras();
+        final Bundle extras = getIntent().getExtras();
         {
             art = findViewById(R.id.art);
             title = findViewById(R.id.episode);
             podcast = findViewById(R.id.podcast);
-            button = findViewById(R.id.play);
+            playButton = findViewById(R.id.play);
+            rwButton = findViewById(R.id.rw);
+            ffButton = findViewById(R.id.ff);
         }
         Picasso.get().load(extras.getString("art")).fit().centerCrop().into(art);
         title.setText(extras.getString("episode"));
         podcast.setText(extras.getString("podcast"));
+        player.playMedia(extras.getString("mp3"));
 
-
-        mp = new MediaPlayer();
-        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            mp.setDataSource(extras.getString("mp3"));
-            mp.prepareAsync();
-            // You can show progress dialog here until it prepared to play
-            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    // Now dismis progress dialog, Media palyer will start playing
-                    mp.start();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        button.setOnClickListener(new View.OnClickListener() {
+        rwButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mp.isPlaying()){
-                    mp.pause();
-                    button.setText(">");
+                player.rwMedia();
+            }
+        });
+
+        ffButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                player.ffMedia();
+            }
+        });
+
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (player.isPlaying()){
+                    player.pauseMedia();
+                    playButton.setText(">");
                 }
-                else if (!mp.isPlaying()){
-                    mp.start();
-                    button.setText("||");
+                else{
+                    player.pauseMedia();
+                    playButton.setText("| |");
                 }
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        mp.stop();
     }
 }
