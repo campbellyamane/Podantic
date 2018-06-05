@@ -16,7 +16,7 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
-    private MediaPlayer pp;
+    private static MediaPlayer pp;
 
     //Used to pause/resume MediaPlayer
     private int resumePosition;
@@ -84,15 +84,17 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     }
 
     private void initMediaPlayer() {
-        pp = new MediaPlayer();
-        //Set up MediaPlayer event listeners
-        pp.setOnCompletionListener(this);
-        pp.setOnErrorListener(this);
-        pp.setOnPreparedListener(this);
-        pp.setOnBufferingUpdateListener(this);
-        pp.setOnSeekCompleteListener(this);
-        pp.setOnInfoListener(this);
-        pp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        if (pp == null){
+            pp = new MediaPlayer();
+            //Set up MediaPlayer event listeners
+            pp.setOnCompletionListener(this);
+            pp.setOnErrorListener(this);
+            pp.setOnPreparedListener(this);
+            pp.setOnBufferingUpdateListener(this);
+            pp.setOnSeekCompleteListener(this);
+            pp.setOnInfoListener(this);
+            pp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        }
     }
 
     public void playMedia(String url){

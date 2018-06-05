@@ -22,7 +22,6 @@ public class NowPlaying extends General {
     private Button playButton;
     private Button rwButton;
     private Button ffButton;
-    private MediaPlayer mp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

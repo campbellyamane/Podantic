@@ -61,7 +61,11 @@ public class MainActivity extends General {
             public void afterTextChanged(Editable s) {
                 //searching iTunes database as long as search is not empty
                 if (s.toString() != "") {
+                    if (ps != null){
+                        ps.cancel(true);
+                    }
                     ps = new podSearch().execute(s.toString());
+                    Log.d("PodAntic","async");
                 }
 
             }
@@ -86,7 +90,6 @@ public class MainActivity extends General {
         String title = "";
         @Override
         protected String doInBackground(String... query) {
-            Log.d("PodAntic","async");
             URL url = null;
             String search = query[0].replace("&", "");
             search = search.replace("+", "");
