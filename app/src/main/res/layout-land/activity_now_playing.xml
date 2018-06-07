@@ -5,16 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".NowPlaying"
-    android:orientation="vertical">
+    android:orientation="horizontal">
     <ImageView
         android:id="@+id/art"
-        android:layout_marginTop="64dp"
-        android:layout_marginBottom="32dp"
-        android:layout_gravity="center"
-        android:layout_width="256dp"
-        android:layout_height="256dp"/>
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="8dp"
+        android:layout_width="240dp"
+        android:layout_height="240dp"/>
     <LinearLayout
         android:orientation="vertical"
+        android:layout_gravity="center"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <TextView
@@ -68,8 +68,8 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_marginRight="16dp"
-            android:layout_marginLeft="16dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_height="96dp">
             <Button
                 android:id="@+id/prev"

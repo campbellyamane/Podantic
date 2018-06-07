@@ -17,6 +17,7 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         AudioManager.OnAudioFocusChangeListener {
 
     private static MediaPlayer pp;
+    private static Episode episode = new Episode("","49731298537982742984232","","","","","");
 
     //Used to pause/resume MediaPlayer
     private int resumePosition;
@@ -97,14 +98,23 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         }
     }
 
-    public void playMedia(String url){
+    public Boolean exists(){
+        return pp != null;
+    }
+
+    public Episode getPlaying(){
+        return episode;
+    }
+
+    public void playMedia(Episode e){
+        episode = e;
         try {
             //Reset so that the MediaPlayer is not pointing to another data source
             pp.reset();
-            pp.setDataSource(url);
+            pp.setDataSource(episode.getMp3());
             pp.prepareAsync();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -148,6 +158,18 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
             pp.seekTo(resumePosition);
             pp.start();
         }
+    }
+
+    public int getDuration(){
+        return pp.getDuration();
+    }
+
+    public int getCurrentPosition(){
+        return pp.getCurrentPosition();
+    }
+
+    public void seekTo(int ms){
+        pp.seekTo(ms);
     }
     @Override
     public void onCompletion(MediaPlayer mp) {

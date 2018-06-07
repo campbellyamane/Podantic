@@ -20,10 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PodHome">
-            android:windowSoftInputMode="adjustResize"
+        <activity android:name=".PodHome"
+            android:windowSoftInputMode="adjustResize">
         </activity>
-        <activity android:name=".NowPlaying"></activity>
+        <activity android:name=".NowPlaying"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
     </application>
 
 </manifest>

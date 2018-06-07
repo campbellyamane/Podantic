@@ -1,6 +1,8 @@
 package com.campbellyamane.podantic;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -45,19 +48,25 @@ import javax.xml.parsers.ParserConfigurationException;
 public class PodHome extends General {
     private ImageView img;
     private TextView name;
+    private Button subscribe;
     private ListView listView;
     private ArrayList<Episode> episodes;
     private EpisodeAdapter adapter;
+    private AsyncTask es;
+    private ProgressDialog dialog;
+    private String feed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pod_home);
+        dialog = ProgressDialog.show(PodHome.this, "Loading",
+                "Grabbing Episodes. Please wait...", true);
         Intent intent = getIntent();
-        String feed = intent.getStringExtra("feed");
+        feed = intent.getStringExtra("feed");
 
         //get episodes for podcast
-        new podRetrieve().execute(feed);
+        es = new podRetrieve().execute(feed);
 
         {
             img = (ImageView) findViewById(R.id.podimage);
@@ -77,8 +86,39 @@ public class PodHome extends General {
                 i.putExtra("art",episodes.get(position).getArt());
                 i.putExtra("podcast",episodes.get(position).getPodcast());
                 i.putExtra("mp3",episodes.get(position).getMp3());
+                if (player.getPlaying().getMp3() != episodes.get(position).getMp3()) {
+                    player.playMedia(episodes.get(position));
+                }
 
                 startActivity(i);
+            }
+        });
+
+        subscribe = findViewById(R.id.subscribe);
+
+        for (int i = 0; i < subscriptionList.size(); i++){
+            Log.d("PodAntic",subscriptionList.get(i).toString());
+            if (subscriptionList.get(i).getName().equals(currentPodcast.getName())){
+                subscribe.setText("Unsubscribe");
+                subscribe.setTextColor(Color.parseColor("red"));
+            }
+        }
+
+        subscribe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (subscribe.getText().equals("Unsubscribe")) {
+                    subscriptionList.remove(currentPodcast);
+                    storageUtil.storeSubscriptions(subscriptionList);
+                    subscribe.setText("Subscribe");
+                    subscribe.setTextColor(Color.parseColor("white"));
+                }
+                else{
+                    subscriptionList.add(currentPodcast);
+                    storageUtil.storeSubscriptions(subscriptionList);
+                    subscribe.setText("Unsubscribe");
+                    subscribe.setTextColor(Color.parseColor("red"));
+                }
             }
         });
     }
@@ -88,6 +128,7 @@ public class PodHome extends General {
         Document doc;
         @Override
         protected Document doInBackground(String... f) {
+            Log.d("PodAntic", "episodeAsync");
             try {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
@@ -117,13 +158,14 @@ public class PodHome extends General {
                 Node image = d.getElementsByTagName("url").item(0).getChildNodes().item(0);
                 podImage = image.getTextContent();
                 Picasso.get().load(podImage).fit().into(img);
+                currentPodcast = new Podcast(podImage, title.getTextContent(), feed);
             }
             catch (Exception e){
                 e.printStackTrace();
             }
             NodeList eps = d.getElementsByTagName("item");
             name.setText(title.getTextContent());
-            Log.d("PodAntic", Integer.toString(eps.getLength()));
+            findViewById(R.id.subscribe).setVisibility(View.VISIBLE);
             for (int i = 0; i < eps.getLength(); i++){
                 try {
                     Element e = (Element) eps.item(i);
@@ -155,6 +197,13 @@ public class PodHome extends General {
                 }
             }
             adapter.notifyDataSetChanged();
+            dialog.dismiss();
         }
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        es.cancel(true);
     }
 }

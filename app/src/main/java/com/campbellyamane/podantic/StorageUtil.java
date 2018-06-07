@@ -2,35 +2,48 @@ package com.campbellyamane.podantic;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
-public class StorageUtils {
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-    private final String STORAGE = " com.valdioveliu.valdio.audioplayer.STORAGE";
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+public class StorageUtil {
+    private final String STORAGE = "com.campbellyamane.podantic.STORAGE";
     private SharedPreferences preferences;
     private Context context;
 
-    public StorageUtils(Context context) {
+    public StorageUtil(Context context) {
         this.context = context;
     }
-    /*
-    public void storeAudio(ArrayList<Audio> arrayList) {
+
+    public void storeSubscriptions(ArrayList<Podcast> arrayList) {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = preferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(arrayList);
-        editor.putString("audioArrayList", json);
+        editor.putString("subscriptionList", json);
         editor.apply();
     }
 
-    public ArrayList<Audio> loadAudio() {
+    public ArrayList<Podcast> loadSubscriptions() {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
-        String json = preferences.getString("audioArrayList", null);
-        Type type = new TypeToken<ArrayList<Audio>>() {
+        String json = preferences.getString("subscriptionList", null);
+        Type type = new TypeToken<ArrayList<Podcast>>() {
         }.getType();
-        return gson.fromJson(json, type);
+        if (gson.fromJson(json,type) == null){
+            return new ArrayList<Podcast>();
+        }
+        else{
+         return gson.fromJson(json, type);
+        }
     }
+
+    /*
 
     public void storeAudioIndex(int index) {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
@@ -49,6 +62,5 @@ public class StorageUtils {
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();
         editor.commit();
-    }
-    */
+    }*/
 }

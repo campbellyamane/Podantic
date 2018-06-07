@@ -11,9 +11,17 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class General extends AppCompatActivity{
 
     public static PodcastService player;
+
+    public static Podcast currentPodcast;
+
+    public static StorageUtil storageUtil;
+
+    public static ArrayList<Podcast> subscriptionList;
     boolean serviceBound = false;
 
     //Binding this Client to the AudioPlayer Service
@@ -35,6 +43,8 @@ public class General extends AppCompatActivity{
     @Override
     protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        storageUtil = new StorageUtil(getApplicationContext());
+        subscriptionList = storageUtil.loadSubscriptions();
         if (!serviceBound) {
             Intent playerIntent = new Intent(this, PodcastService.class);
             startService(playerIntent);

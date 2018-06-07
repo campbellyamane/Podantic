@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -37,15 +39,41 @@ public class MainActivity extends General {
     private AutoCompleteTextView searchView;
     private AsyncTask ps;
 
+    private ArrayList<Podcast> podcasts;
+    private PodcastAdapter podcastAdapter;
+    private GridView gridView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        podcasts = new ArrayList<Podcast>();
+        podcastAdapter = new PodcastAdapter(this, subscriptionList);
+        gridView = (GridView) findViewById(R.id.podcast_grid);
+        gridView.setAdapter(podcastAdapter);
+
         //setting lists and views
         results =  new ArrayList<>();
         adapter = new AutoCompleteAdapter (this, android.R.layout.simple_dropdown_item_1line, results);
         searchView = (AutoCompleteTextView) findViewById(R.id.search);
+        searchView.setAdapter(adapter);
+
+        //start single podcast activity on click
+        searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), PodHome.class);
+                intent.putExtra("feed", feeds.get(position));
+                searchView.setText("");
+                startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -65,21 +93,8 @@ public class MainActivity extends General {
                         ps.cancel(true);
                     }
                     ps = new podSearch().execute(s.toString());
-                    Log.d("PodAntic","async");
                 }
 
-            }
-        });
-        searchView.setAdapter(adapter);
-
-        //start single podcast activity on click
-        searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getApplicationContext(), PodHome.class);
-                intent.putExtra("feed", feeds.get(position));
-                searchView.setText("");
-                startActivity(intent);
             }
         });
     }
@@ -90,18 +105,22 @@ public class MainActivity extends General {
         String title = "";
         @Override
         protected String doInBackground(String... query) {
+            Log.d("PodAntic", "podcastAsync");
             URL url = null;
             String search = query[0].replace("&", "");
             search = search.replace("+", "");
             search = search.replace(" ", "+");
             try {
                 url = new URL(url1 + search);
+                Log.d("PodAntic", "podcastURL");
                 InputStream in = url.openStream();
+                Log.d("PodAntic", "podcastStream");
                 InputStreamReader reader = new InputStreamReader(in);
                 JSONObject json = getObject(reader);
+                JSONArray searchResults = json.getJSONArray("results");
+                Log.d("PodAntic", "gotJSON");
                 results =  new ArrayList<>();
                 feeds = new ArrayList<>();
-                JSONArray searchResults = json.getJSONArray("results");
 
                 //return top 5 results from iTunes db
                 for (int i = 0; i < searchResults.length(); i++){
@@ -152,6 +171,8 @@ public class MainActivity extends General {
     @Override
     protected void onPause(){
         super.onPause();
+        results =  new ArrayList<>();
+        feeds = new ArrayList<>();
         ps.cancel(true);
     }
 }
