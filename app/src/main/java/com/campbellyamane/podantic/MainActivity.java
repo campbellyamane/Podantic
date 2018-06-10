@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -26,15 +27,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends General {
 
     private ArrayList<String> results;
     private ArrayList<String> feeds;
+    private ArrayList<String> artwork;
+    private ArrayList<ArrayList<String>> categories;
     private AutoCompleteAdapter adapter;
     private AutoCompleteTextView searchView;
     private AsyncTask ps;
@@ -43,15 +50,15 @@ public class MainActivity extends General {
     private PodcastAdapter podcastAdapter;
     private GridView gridView;
 
+    private Spinner spinner;
+    private ArrayList<String> spinnerArray;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         podcasts = new ArrayList<Podcast>();
-        podcastAdapter = new PodcastAdapter(this, subscriptionList);
-        gridView = (GridView) findViewById(R.id.podcast_grid);
-        gridView.setAdapter(podcastAdapter);
 
         //setting lists and views
         results =  new ArrayList<>();
@@ -64,8 +71,8 @@ public class MainActivity extends General {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), PodHome.class);
-                intent.putExtra("feed", feeds.get(position));
                 searchView.setText("");
+                currentPodcast = new Podcast(artwork.get(position), results.get(position), feeds.get(position), categories.get(position));
                 startActivity(intent);
             }
         });
@@ -74,6 +81,63 @@ public class MainActivity extends General {
     @Override
     protected void onResume(){
         super.onResume();
+
+        podcastAdapter = new PodcastAdapter(this, displayList);
+        gridView = (GridView) findViewById(R.id.podcast_grid);
+        gridView.setAdapter(podcastAdapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (ps != null) {
+                    ps.cancel(true);
+                }
+                Intent intent = new Intent(getApplicationContext(), PodHome.class);
+                intent.putExtra("feed", displayList.get(position).getFeed());
+                searchView.setText("");
+                currentPodcast = displayList.get(position);
+                startActivity(intent);
+            }
+        });
+
+        spinnerArray =  new ArrayList<String>();
+        for(Map.Entry<String,Integer> entry : categoriesList.entrySet()) {
+            if (entry.getValue() > 0) {
+                spinnerArray.add(entry.getKey() + " (" + entry.getValue() + ")");
+            }
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, spinnerArray);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        Spinner sItems = (Spinner) findViewById(R.id.categories);
+        sItems.setAdapter(adapter);
+
+        sItems.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String curCat = spinnerArray.get(position).split(" \\(")[0];
+                if (curCat.equals("All Categories")){
+                    displayList = (ArrayList<Podcast>) subscriptionList;
+                }
+                else {
+                    displayList = new ArrayList<>();
+                    for (int i = 0; i < subscriptionList.size(); i++) {
+                        if (subscriptionList.get(i).getCategories().contains(curCat)) {
+                            displayList.add(subscriptionList.get(i));
+                        }
+                    }
+                    Log.d("PodAntic", Integer.toString(displayList.size()));
+                }
+                podcastAdapter.update(displayList);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         searchView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -88,10 +152,7 @@ public class MainActivity extends General {
             @Override
             public void afterTextChanged(Editable s) {
                 //searching iTunes database as long as search is not empty
-                if (s.toString() != "") {
-                    if (ps != null){
-                        ps.cancel(true);
-                    }
+                if (s.toString().length() > 0) {
                     ps = new podSearch().execute(s.toString());
                 }
 
@@ -100,20 +161,20 @@ public class MainActivity extends General {
     }
 
     public class podSearch extends AsyncTask<String, String, String> {
-        String url1 = "https://itunes.apple.com/search?entity=podcast&limit=5&sort=popularity&term=";
+        String url1 = "http://itunes.apple.com/search?entity=podcast&limit=5&sort=popularity&term=";
         String mp3 = "";
         String title = "";
         @Override
         protected String doInBackground(String... query) {
+            String search = query[0].replace("+", " ").replace("&", " ");
             Log.d("PodAntic", "podcastAsync");
             URL url = null;
-            String search = query[0].replace("&", "");
-            search = search.replace("+", "");
-            search = search.replace(" ", "+");
             try {
                 url = new URL(url1 + search);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 Log.d("PodAntic", "podcastURL");
-                InputStream in = url.openStream();
+                urlConnection.setReadTimeout(3000);
+                InputStream in = urlConnection.getInputStream();
                 Log.d("PodAntic", "podcastStream");
                 InputStreamReader reader = new InputStreamReader(in);
                 JSONObject json = getObject(reader);
@@ -121,11 +182,22 @@ public class MainActivity extends General {
                 Log.d("PodAntic", "gotJSON");
                 results =  new ArrayList<>();
                 feeds = new ArrayList<>();
+                artwork = new ArrayList<>();
+                categories = new ArrayList<>();
 
                 //return top 5 results from iTunes db
                 for (int i = 0; i < searchResults.length(); i++){
+                    Log.d("PodAntic", searchResults.getJSONObject(i).getString("collectionName"));
                     results.add(searchResults.getJSONObject(i).getString("collectionName"));
                     feeds.add(searchResults.getJSONObject(i).getString("feedUrl"));
+                    artwork.add(searchResults.getJSONObject(i).getString("artworkUrl100"));
+                    JSONArray genres = searchResults.getJSONObject(i).getJSONArray("genres");
+                    Log.d("PodAntic", genres.toString());
+                    ArrayList<String> cats = new ArrayList<>();
+                    for (int j = 0; j < genres.length(); j++){
+                        cats.add(genres.getString(j));
+                    }
+                    categories.add(cats);
                     if (i == 4){
                         break;
                     }
@@ -134,12 +206,14 @@ public class MainActivity extends General {
                 in.close();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                Log.d("PodAntic", "malformedurl");
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.d("PodAntic", "input");
             } catch (JSONException e) {
                 e.printStackTrace();
+                Log.d("PodAntic", "json");
             }
-            Log.d("PodAntic", results.toString());
             return title;
         }
 
@@ -173,6 +247,22 @@ public class MainActivity extends General {
         super.onPause();
         results =  new ArrayList<>();
         feeds = new ArrayList<>();
-        ps.cancel(true);
+        artwork = new ArrayList<>();
+        try {
+            ps.cancel(true);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (serviceBound) {
+            unbindService(serviceConnection);
+            //service is active
+            player.stopSelf();
+        }
     }
 }

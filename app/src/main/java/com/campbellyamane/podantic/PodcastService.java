@@ -24,32 +24,44 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
 
     private AudioManager audioManager;
 
+    private boolean shouldStart = true;
+
     @Override
     public void onAudioFocusChange(int focusState) {
         //Invoked when the audio focus of the system is updated.
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 // resume playback
-                if (pp == null) initMediaPlayer();
-                else if (!pp.isPlaying()) pp.start();
+                if (pp == null) {
+                    initMediaPlayer();
+                }
+                else if (!pp.isPlaying() && shouldStart){
+                    pp.start();
+                }
                 pp.setVolume(1.0f, 1.0f);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media player
-                if (pp.isPlaying()) pp.stop();
-                pp.release();
-                pp = null;
+                if (pp.isPlaying()){
+                    pp.pause();
+                    shouldStart = true;
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // Lost focus for a short time, but we have to stop
                 // playback. We don't release the media player because playback
                 // is likely to resume
-                if (pp.isPlaying()) pp.pause();
+                if (pp.isPlaying()){
+                    pp.pause();
+                    shouldStart = true;
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
-                if (pp.isPlaying()) pp.setVolume(0.1f, 0.1f);
+                if (pp.isPlaying()) {
+                    pp.setVolume(0.1f, 0.1f);
+                }
                 break;
         }
     }
@@ -107,14 +119,23 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     }
 
     public void playMedia(Episode e){
-        episode = e;
-        try {
-            //Reset so that the MediaPlayer is not pointing to another data source
-            pp.reset();
-            pp.setDataSource(episode.getMp3());
-            pp.prepareAsync();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        if (requestAudioFocus()) {
+            episode = e;
+            try {
+                //Reset so that the MediaPlayer is not pointing to another data source
+                pp.reset();
+                pp.setDataSource(episode.getMp3());
+                pp.prepareAsync();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } catch (IllegalStateException ex) {
+                try {
+                    pp.setDataSource(episode.getMp3());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                pp.prepareAsync();
+            }
         }
     }
 
@@ -135,6 +156,7 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         if (pp.isPlaying()) {
             pp.pause();
             resumePosition = pp.getCurrentPosition();
+            shouldStart = false;
         }
         else if (!pp.isPlaying()){
             pp.start();
@@ -233,7 +255,6 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     public void onDestroy() {
         super.onDestroy();
         if (pp != null) {
-            stopMedia();
             pp.release();
         }
         if (audioManager != null) {

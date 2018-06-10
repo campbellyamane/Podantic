@@ -9,11 +9,17 @@ import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class General extends AppCompatActivity{
+
+    private static DisplayMetrics displayMetrics = new DisplayMetrics();
+
+    public static int screenWidth;
 
     public static PodcastService player;
 
@@ -22,10 +28,12 @@ public class General extends AppCompatActivity{
     public static StorageUtil storageUtil;
 
     public static ArrayList<Podcast> subscriptionList;
-    boolean serviceBound = false;
+    public static ArrayList<Podcast> displayList;
+    public static TreeMap<String, Integer> categoriesList;
+    public static boolean serviceBound = false;
 
     //Binding this Client to the AudioPlayer Service
-    private ServiceConnection serviceConnection = new ServiceConnection() {
+    public static ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
@@ -43,8 +51,14 @@ public class General extends AppCompatActivity{
     @Override
     protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        screenWidth =  displayMetrics.widthPixels;
+
         storageUtil = new StorageUtil(getApplicationContext());
         subscriptionList = storageUtil.loadSubscriptions();
+        displayList = (ArrayList<Podcast>) subscriptionList.clone();
+        categoriesList = storageUtil.loadCategories();
         if (!serviceBound) {
             Intent playerIntent = new Intent(this, PodcastService.class);
             startService(playerIntent);
@@ -65,15 +79,5 @@ public class General extends AppCompatActivity{
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         serviceBound = savedInstanceState.getBoolean("ServiceState");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (serviceBound) {
-            unbindService(serviceConnection);
-            //service is active
-            player.stopSelf();
-        }
     }
 }
