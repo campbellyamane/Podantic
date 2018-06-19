@@ -12,6 +12,11 @@
             android:id="@+id/downloads"
             android:title="My Downloads" />
     </group>
+    <group android:id="@+id/online"
+        android:checkableBehavior="single">
+        <item android:id="@+id/discover"
+            android:title="Discover"/>
+    </group>
     <group android:id="@+id/other"
         android:checkableBehavior="single">
         <item

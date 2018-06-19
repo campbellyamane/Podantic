@@ -41,6 +41,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+
+//activity for downloads, uses service callbacks to update icons according to playback
 public class Downloads extends General implements PodcastService.Callbacks{
 
     private ListView listView;
@@ -62,6 +64,8 @@ public class Downloads extends General implements PodcastService.Callbacks{
         adapter = new EpisodeAdapter(this, downloadsList);
 
         listView.setAdapter(adapter);
+
+        //clicking on episode in list opens track in nowplaying activity, resumes if possible
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -76,6 +80,7 @@ public class Downloads extends General implements PodcastService.Callbacks{
             }
         });
 
+        //longpress episode opens options menu
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -90,6 +95,8 @@ public class Downloads extends General implements PodcastService.Callbacks{
         });
 
         epSearch = findViewById(R.id.episode_search);
+
+        //searching episodes by description or title
         epSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -124,6 +131,8 @@ public class Downloads extends General implements PodcastService.Callbacks{
     @Override
     protected void onResume(){
         super.onResume();
+
+        //updates actionbar title, resets episode search query, updates listview, updates nowplayingbar
         getSupportActionBar().setTitle("My Downloads");
         navigationView.getMenu().getItem(2).setChecked(true);
         epSearch.setText("");
@@ -136,6 +145,7 @@ public class Downloads extends General implements PodcastService.Callbacks{
         nowPlayingView();
     }
 
+    //longpress menu initialization
     public void showMenu(final Episode ep){
         final Dialog lpMenu = new Dialog(this);
         lpMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -202,7 +212,7 @@ public class Downloads extends General implements PodcastService.Callbacks{
         lpMenu.show();
     }
 
-
+    //callbacks
     @Override
     public void cbSetPlay(boolean play){
         if (play){

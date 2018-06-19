@@ -126,7 +126,7 @@ public class InProgress extends General implements PodcastService.Callbacks{
         super.onResume();
         inProgressList = storageUtil.loadInProgress();
         getSupportActionBar().setTitle("Playback in Progress");
-        navigationView.getMenu().getItem(2).setChecked(true);
+        navigationView.getMenu().getItem(5).setChecked(true);
         epSearch.setText("");
         try {
             player.registerCallbacks(this);

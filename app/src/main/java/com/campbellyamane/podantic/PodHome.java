@@ -3,6 +3,7 @@ package com.campbellyamane.podantic;
 import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -83,8 +84,19 @@ public class PodHome extends General implements PodcastService.Callbacks{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pod_home);
 
-        dialog = ProgressDialog.show(PodHome.this, "Loading",
-                "Grabbing Episodes. Please wait...", true);
+        dialog = new ProgressDialog(PodHome.this);
+        dialog.setTitle("Loading");
+        dialog.setMessage("Grabbing Episodes. Please wait...");
+        dialog.setCancelable(false);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                es.cancel(true);
+                onBackPressed();
+            }
+        });
+        dialog.show();
         //get episodes for podcast
         if (es != null){
             es.cancel(true);

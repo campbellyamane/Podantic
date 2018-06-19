@@ -1,6 +1,7 @@
 package com.campbellyamane.podantic;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -251,8 +252,18 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
     @Override
     public void cbPreLoad(){
         String[] d = currentEpisode.getMp3().split("/");
-        dialog = ProgressDialog.show(NowPlaying.this, "Loading",
-                "Connecting to " + d[0] + "//" + d[2] + "...", true);
+        dialog = new ProgressDialog(NowPlaying.this);
+        dialog.setTitle("Loading");
+        dialog.setMessage("Connecting to " + d[0] + "//" + d[2] + "...");
+        dialog.setCancelable(false);
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                onBackPressed();
+            }
+        });
+        dialog.show();
     }
 
     @Override

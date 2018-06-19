@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+
+//custom autocompleteadapter to fill info from itunes search api
 public class AutoCompleteAdapter extends ArrayAdapter implements Filterable {
 
     ArrayList<String> allPods;
