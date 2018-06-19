@@ -21,7 +21,7 @@
         android:paddingLeft="8dp"
         android:paddingTop="8dp"
         android:singleLine="true"
-        android:background="#60000000"
+        android:background="@drawable/gradient_opacity"
         android:layout_alignBottom="@id/podcast"
         android:textColor="@color/white" />
 </RelativeLayout>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+    <LinearLayout
+        android:paddingTop="16dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/play"
+            android:background="?attr/selectableItemBackground"
+            android:paddingLeft="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Play"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/favorites"
+            android:background="?attr/selectableItemBackground"
+            android:paddingLeft="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Add to Favorites"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/download"
+            android:background="?attr/selectableItemBackground"
+            android:paddingLeft="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Download Episode"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textSize="20sp"/>
+    </LinearLayout>
+</LinearLayout>

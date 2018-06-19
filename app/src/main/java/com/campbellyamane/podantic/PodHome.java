@@ -1,18 +1,28 @@
 package com.campbellyamane.podantic;
 
+import android.app.ActivityOptions;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.transition.Slide;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +32,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -52,7 +63,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class PodHome extends General {
+public class PodHome extends General implements PodcastService.Callbacks{
     private ImageView img;
     private TextView name;
     private Button subscribe;
@@ -62,15 +73,18 @@ public class PodHome extends General {
     private AsyncTask es;
     private ProgressDialog dialog;
     private EditText epSearch;
+    private boolean bound;
+
+    private ArrayList<Episode> searched;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(R.anim.slide_in_from_right,R.anim.slide_out_from_right);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pod_home);
+
         dialog = ProgressDialog.show(PodHome.this, "Loading",
                 "Grabbing Episodes. Please wait...", true);
-        Intent intent = getIntent();
-
         //get episodes for podcast
         if (es != null){
             es.cancel(true);
@@ -90,18 +104,27 @@ public class PodHome extends General {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(PodHome.this, NowPlaying.class);
-                i.putExtra("episode",episodes.get(position).getTitle());
-                i.putExtra("art",episodes.get(position).getArt());
-                i.putExtra("podcast",episodes.get(position).getPodcast());
-                i.putExtra("mp3",episodes.get(position).getMp3());
-                Log.d("PodAntic", player.getPlaying().getMp3());
-                Log.d("PodAntic", episodes.get(position).getMp3());
-                if (!player.getPlaying().getMp3().equals(episodes.get(position).getMp3())) {
-                    player.playMedia(episodes.get(position));
+                Intent intent = new Intent(PodHome.this, NowPlaying.class);
+                if (searched != null && searched.size() != episodes.size()) {
+                    currentEpisode = searched.get(position);
                 }
+                else{
+                    currentEpisode = episodes.get(position);
+                }
+                startActivity(intent);
+            }
+        });
 
-                startActivity(i);
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (searched != null && searched.size() != episodes.size()) {
+                    showMenu(searched.get(position));
+                }
+                else {
+                    showMenu(episodes.get(position));
+                }
+                return true;
             }
         });
 
@@ -119,16 +142,18 @@ public class PodHome extends General {
 
             @Override
             public void afterTextChanged(Editable s) {
+                String se = s.toString().toLowerCase();
                 if (s.toString().length() > 0) {
-                    ArrayList<Episode> searched = new ArrayList<Episode>();
+                    searched = new ArrayList<Episode>();
                     for (int i = 0; i < episodes.size(); i++) {
-                        if (episodes.get(i).getTitle().contains(s) || episodes.get(i).getDetails().contains(s)) {
+                        if (episodes.get(i).getTitle().toLowerCase().contains(se) || episodes.get(i).getDetails().toLowerCase().contains(se)) {
                             searched.add(episodes.get(i));
                         }
                     }
                     adapter.update(searched);
                 }
                 else {
+                    searched = episodes;
                     adapter.update(episodes);
                 }
             }
@@ -155,14 +180,14 @@ public class PodHome extends General {
                     storageUtil.storeSubscriptions(subscriptionList);
                     subscribe.setText("Subscribe");
                     subscribe.setTextColor(Color.parseColor("white"));
-                    checkCategories(false);
+                    checkCategories(false, currentPodcast);
                 }
                 else{
                     subscriptionList.add(currentPodcast);
                     storageUtil.storeSubscriptions(subscriptionList);
                     subscribe.setText("Unsubscribe");
                     subscribe.setTextColor(Color.parseColor("red"));
-                    checkCategories(true);
+                    checkCategories(true, currentPodcast);
                 }
             }
         });
@@ -177,9 +202,10 @@ public class PodHome extends General {
             try {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
-                HttpURLConnection urlConnection = (HttpURLConnection) new URL(f[0]).openConnection();
-                urlConnection.setReadTimeout(3000);
-                InputStream in = urlConnection.getInputStream();
+                URLConnection conn = new URL(f[0]).openConnection();
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                InputStream in =  (InputStream) conn.getInputStream();
                 doc = db.parse(in);
                 in.close();
             } catch (MalformedURLException e) {
@@ -262,32 +288,108 @@ public class PodHome extends General {
         }
     }
 
-    public void checkCategories(Boolean newSub){
-        ArrayList<String> currentCats = currentPodcast.getCategories();
-        if (newSub){
-            try {
-                categoriesList.put("All Categories", categoriesList.get("All Categories") + 1);
-            } catch (Exception e){
-                categoriesList.put("All Categories", 1);
+    @Override
+    protected void onResume(){
+        super.onResume();
+        epSearch.setText("");
+        try {
+            player.registerCallbacks(this);
+        } catch (Exception e){
+            //nada
+        }
+        getSupportActionBar().setTitle(currentPodcast.getName());
+        adapter.update(episodes);
+        nowPlayingView();
+    }
+
+    public void showMenu(final Episode ep){
+        final Dialog lpMenu = new Dialog(this);
+        lpMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        lpMenu.setContentView(R.layout.longpress_episode);
+        final int width = Resources.getSystem().getDisplayMetrics().widthPixels;
+        final int height = Resources.getSystem().getDisplayMetrics().heightPixels;
+        lpMenu.getWindow().setLayout((int)(width*.9),(int)(height*.9));
+
+        setLpVariables(lpMenu);
+
+        if (isInFavorites(ep)){
+            lpFavorite.setText("Remove from Favorites");
+        }
+        else {
+            lpFavorite.setText("Add to Favorites");
+        }
+
+        if (isInDownloads(ep)){
+            lpDownload.setText("Delete Downloaded Episode");
+        }
+        else {
+            lpDownload.setText("Download Episode");
+        }
+
+        lpPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentEpisode = ep;
+                Intent intent = new Intent(PodHome.this, NowPlaying.class);
+                intent.putExtra("prevPlay", player.getPlaying().getMp3());
+                startActivity(intent);
+                lpMenu.dismiss();
             }
-            for (int i = 0; i < currentCats.size(); i++){
-                String key = currentCats.get(i);
-                if (categoriesList.containsKey(key)){
-                    categoriesList.put(key, categoriesList.get(key) + 1);
+        });
+
+        lpFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                lpMenu.dismiss();
+                if (updateFavorites(ep)) {
+                    Toast.makeText(PodHome.this, "Episode Added to Favorites", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(PodHome.this, "Episode Removed from Favorites", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        lpDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                lpMenu.dismiss();
+                if (isInDownloads(ep)) {
+                    deleteDownload(ep);
                 }
                 else{
-                    categoriesList.put(key, 1);
+                    downloadEpisode(ep);
                 }
             }
+        });
+
+        lpMenu.show();
+    }
+
+    public Palette createPaletteSync() {
+        BitmapDrawable drawable = (BitmapDrawable) img.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        Palette p = Palette.from(bitmap).generate();
+        return p;
+    }
+
+    @Override
+    public void cbSetPlay(boolean play){
+        if (play){
+            nowPlayingButton.setImageResource(R.drawable.ic_baseline_pause_24px);
         }
-        else{
-            for (int i = 0; i < currentCats.size(); i++) {
-                String key = currentCats.get(i);
-                categoriesList.put(key, categoriesList.get(key) - 1);
-            }
-            categoriesList.put("All Categories", categoriesList.get("All Categories") - 1);
+        else {
+            nowPlayingButton.setImageResource(R.drawable.ic_baseline_play_arrow_24px);
         }
-        storageUtil.storeCategories(categoriesList);
-        categoriesList = storageUtil.loadCategories();
+    }
+
+    @Override
+    public void cbOnLoad(){
+        //nada
+    }
+
+    @Override
+    public void cbPreLoad(){
+        //nada
     }
 }

@@ -1,116 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".NowPlaying"
+    android:id="@+id/drawer_layout"
+    android:background="@color/black"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NowPlaying"
-    android:orientation="horizontal">
-    <ImageView
-        android:id="@+id/art"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="8dp"
-        android:layout_width="240dp"
-        android:layout_height="240dp"/>
+    android:fitsSystemWindows="true">
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_gravity="center"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:id="@+id/episode"
-            android:layout_marginRight="32dp"
-            android:layout_marginLeft="32dp"
-            android:textStyle="bold"
-            android:text="Episode"
-            android:textAlignment="center"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:id="@+id/podcast"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="32dp"
-            android:layout_marginLeft="32dp"
-            android:textStyle="bold"
-            android:text="Episode"
-            android:textAlignment="center"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <LinearLayout
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="10">
-            <TextView
-                android:id="@+id/time_elapsed"
-                android:gravity="right"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.8"/>
-            <SeekBar
-                android:id="@+id/seekbar"
-                android:layout_weight="6.4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:id="@+id/time_left"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.8"/>
-        </LinearLayout>
+            android:background="@color/white"
+            app:titleTextColor="@color/black"
+            android:elevation="4dp"/>
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_marginRight="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_height="96dp">
-            <Button
-                android:id="@+id/prev"
-                android:text="|&lt;"
-                android:textAlignment="center"
-                android:textSize="32sp"
-                android:layout_gravity="center"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
-            <Button
-                android:id="@+id/rw"
-                android:text="&lt;&lt;"
-                android:textAlignment="center"
-                android:textSize="32sp"
-                android:layout_gravity="center"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
-            <Button
-                android:id="@+id/play"
-                android:text="| |"
-                android:textAlignment="center"
-                android:textSize="32sp"
-                android:layout_gravity="center"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
-            <Button
-                android:id="@+id/ff"
-                android:text="&gt;&gt;"
-                android:textAlignment="center"
-                android:textSize="32sp"
-                android:layout_gravity="center"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
-            <Button
-                android:id="@+id/next"
-                android:text="&gt;|"
-                android:textAlignment="center"
-                android:textSize="32sp"
-                android:layout_gravity="center"
-                android:layout_width="64dp"
-                android:layout_height="64dp" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <RelativeLayout
+                android:id="@+id/main_info"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:layout_marginLeft="32dp"
+                android:layout_width="196dp"
+                android:layout_height="196dp">
+                <ImageView
+                    android:id="@+id/art"
+                    android:alpha="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/details"
+                    android:alpha="0"
+                    android:scrollbars="vertical"
+                    android:clickable="false"
+                    android:padding="16dp"
+                    android:textColor="@color/white"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+            </RelativeLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_marginTop="64dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/episode"
+                    android:layout_marginRight="32dp"
+                    android:layout_marginLeft="32dp"
+                    android:textStyle="bold"
+                    android:text="Episode"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:gravity="start"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/podcast"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="32dp"
+                    android:layout_marginLeft="32dp"
+                    android:textStyle="bold"
+                    android:text="Episode"
+                    android:textAlignment="center"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <LinearLayout
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="10">
+                    <TextView
+                        android:id="@+id/time_elapsed"
+                        android:gravity="right"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.8"/>
+                    <SeekBar
+                        android:id="@+id/seekbar"
+                        android:layout_weight="6.4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:id="@+id/time_left"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.8"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_height="96dp">
+                    <ImageButton
+                        android:id="@+id/prev"
+                        android:src="@drawable/ic_baseline_skip_previous_24px_white"
+                        android:background="?attr/selectableItemBackground"
+                        android:layout_gravity="center"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+                    <ImageButton
+                        android:id="@+id/rw"
+                        android:src="@drawable/ic_baseline_fast_rewind_24px_white"
+                        android:background="?attr/selectableItemBackground"
+                        android:layout_gravity="center"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+                    <ImageButton
+                        android:id="@+id/play"
+                        android:src="@drawable/ic_baseline_pause_24px_white"
+                        android:background="?attr/selectableItemBackground"
+                        android:layout_gravity="center"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+                    <ImageButton
+                        android:id="@+id/ff"
+                        android:src="@drawable/ic_baseline_fast_forward_24px_white"
+                        android:background="?attr/selectableItemBackground"
+                        android:layout_gravity="center"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+                    <ImageButton
+                        android:id="@+id/next"
+                        android:src="@drawable/ic_baseline_skip_next_24px_white"
+                        android:background="?attr/selectableItemBackground"
+                        android:layout_gravity="center"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        app:itemTextColor="@color/white"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_view"
+        app:headerLayout="@layout/nav_header" />
+</android.support.v4.widget.DrawerLayout>

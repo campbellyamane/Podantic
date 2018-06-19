@@ -2,6 +2,7 @@ package com.campbellyamane.podantic;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +19,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.campbellyamane.podantic.General.player;
 
 public class EpisodeAdapter extends ArrayAdapter<Episode>{
 
@@ -53,7 +56,20 @@ public class EpisodeAdapter extends ArrayAdapter<Episode>{
         date.setText(currentEpisode.getDate());
 
         TextView time = (TextView) listItem.findViewById(R.id.episode_time);
-        time.setText(currentEpisode.getTime());
+        try {
+            if (currentEpisode.getMp3().equals(General.currentEpisode.getMp3())) {
+                time.setText("");
+                time.setCompoundDrawablesWithIntrinsicBounds(0,0, R.drawable.ic_baseline_volume_up_24px_white, 0);
+            }
+            else {
+                time.setText(currentEpisode.getTime());
+                time.setCompoundDrawablesWithIntrinsicBounds(0,0, 0, 0);
+            }
+        }
+        catch (Exception e) {
+            time.setText(currentEpisode.getTime());
+            time.setCompoundDrawablesWithIntrinsicBounds(0,0, 0, 0);
+        }
         return listItem;
     }
 

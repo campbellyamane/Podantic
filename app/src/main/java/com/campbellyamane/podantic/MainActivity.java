@@ -1,23 +1,45 @@
 package com.campbellyamane.podantic;
 
+import android.Manifest;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.IBinder;
+import android.provider.SyncStateContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,8 +57,10 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class MainActivity extends General {
+public class MainActivity extends General implements PodcastService.Callbacks{
 
     private ArrayList<String> results;
     private ArrayList<String> feeds;
@@ -53,17 +77,42 @@ public class MainActivity extends General {
     private Spinner spinner;
     private ArrayList<String> spinnerArray;
 
+    //Binding this Client to the AudioPlayer Service
+    public static ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            PodcastService.LocalBinder binder = (PodcastService.LocalBinder) service;
+            player = binder.getService();
+            serviceBound = true;
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBound = false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        PermissionCheck.readAndWriteExternalStorage(this);
+        overridePendingTransition(R.anim.slide_in_from_right,R.anim.slide_out_from_right);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent playerIntent = new Intent(getBaseContext(), PodcastService.class);
+        bindService(playerIntent, serviceConnection, 0);
+        startService(playerIntent);
 
         podcasts = new ArrayList<Podcast>();
 
         //setting lists and views
         results =  new ArrayList<>();
+        Log.d("PodAntic", results.toString());
         adapter = new AutoCompleteAdapter (this, android.R.layout.simple_dropdown_item_1line, results);
         searchView = (AutoCompleteTextView) findViewById(R.id.search);
+        searchView.setDropDownBackgroundResource(R.color.black);
         searchView.setAdapter(adapter);
 
         //start single podcast activity on click
@@ -81,6 +130,21 @@ public class MainActivity extends General {
     @Override
     protected void onResume(){
         super.onResume();
+        try {
+            player.registerCallbacks(this);
+        } catch (Exception e){
+            //nada
+        }
+        getSupportActionBar().setTitle("My Subscriptions");
+        navigationView.getMenu().getItem(0).setChecked(true);
+        nowPlayingView();
+
+        updateCategories();
+
+        if (player != null && !player.exists()){
+            Intent svc = new Intent(getBaseContext(), PodcastService.class);
+            bindService(svc, serviceConnection, 0);
+        }
 
         podcastAdapter = new PodcastAdapter(this, displayList);
         gridView = (GridView) findViewById(R.id.podcast_grid);
@@ -99,46 +163,41 @@ public class MainActivity extends General {
             }
         });
 
-        spinnerArray =  new ArrayList<String>();
-        for(Map.Entry<String,Integer> entry : categoriesList.entrySet()) {
-            if (entry.getValue() > 0) {
-                spinnerArray.add(entry.getKey() + " (" + entry.getValue() + ")");
-            }
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, spinnerArray);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        Spinner sItems = (Spinner) findViewById(R.id.categories);
-        sItems.setAdapter(adapter);
-
-        sItems.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String curCat = spinnerArray.get(position).split(" \\(")[0];
-                if (curCat.equals("All Categories")){
-                    displayList = (ArrayList<Podcast>) subscriptionList;
-                }
-                else {
-                    displayList = new ArrayList<>();
-                    for (int i = 0; i < subscriptionList.size(); i++) {
-                        if (subscriptionList.get(i).getCategories().contains(curCat)) {
-                            displayList.add(subscriptionList.get(i));
-                        }
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Dialog lpMenu = new Dialog(MainActivity.this);
+                lpMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                lpMenu.setContentView(R.layout.longpress_podcast);
+                final int width = Resources.getSystem().getDisplayMetrics().widthPixels;
+                final int height = Resources.getSystem().getDisplayMetrics().heightPixels;
+                lpMenu.getWindow().setLayout((int)(width*.9),(int)(height*.9));
+
+                TextView unsubscribe = (TextView) lpMenu.findViewById(R.id.unsubscribe);
+
+                unsubscribe.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(MainActivity.this, "Unsubscribed from " + displayList.get(position).getName(), Toast.LENGTH_SHORT).show();
+                        Log.d("PodAntic", Integer.toString(position));
+                        Log.d("PodAntic", displayList.get(position).getName());
+                        checkCategories(false, displayList.get(position));
+                        subscriptionList.remove(displayList.get(position));
+                        storageUtil.storeSubscriptions(subscriptionList);
+                        podcastAdapter.update(displayList);
+                        updateCategories();
+                        lpMenu.dismiss();
                     }
-                    Log.d("PodAntic", Integer.toString(displayList.size()));
-                }
-                podcastAdapter.update(displayList);
-            }
+                });
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                lpMenu.show();
 
+                return true;
             }
         });
 
         searchView.addTextChangedListener(new TextWatcher() {
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -151,9 +210,14 @@ public class MainActivity extends General {
 
             @Override
             public void afterTextChanged(Editable s) {
-                //searching iTunes database as long as search is not empty
-                if (s.toString().length() > 0) {
-                    ps = new podSearch().execute(s.toString());
+                try {
+                    ps.cancel(true);
+                } catch (Exception e){
+                    //nothing
+                }
+                String se = s.toString();
+                if (se.length() > 0) {
+                    ps = new podSearch().execute(se);
                 }
 
             }
@@ -170,16 +234,19 @@ public class MainActivity extends General {
             Log.d("PodAntic", "podcastAsync");
             URL url = null;
             try {
+
                 url = new URL(url1 + search);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                URLConnection conn = url.openConnection();
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
                 Log.d("PodAntic", "podcastURL");
-                urlConnection.setReadTimeout(3000);
-                InputStream in = urlConnection.getInputStream();
+                InputStream in = (InputStream) conn.getInputStream();
                 Log.d("PodAntic", "podcastStream");
                 InputStreamReader reader = new InputStreamReader(in);
                 JSONObject json = getObject(reader);
                 JSONArray searchResults = json.getJSONArray("results");
                 Log.d("PodAntic", "gotJSON");
+
                 results =  new ArrayList<>();
                 feeds = new ArrayList<>();
                 artwork = new ArrayList<>();
@@ -187,12 +254,10 @@ public class MainActivity extends General {
 
                 //return top 5 results from iTunes db
                 for (int i = 0; i < searchResults.length(); i++){
-                    Log.d("PodAntic", searchResults.getJSONObject(i).getString("collectionName"));
                     results.add(searchResults.getJSONObject(i).getString("collectionName"));
                     feeds.add(searchResults.getJSONObject(i).getString("feedUrl"));
                     artwork.add(searchResults.getJSONObject(i).getString("artworkUrl100"));
                     JSONArray genres = searchResults.getJSONObject(i).getJSONArray("genres");
-                    Log.d("PodAntic", genres.toString());
                     ArrayList<String> cats = new ArrayList<>();
                     for (int j = 0; j < genres.length(); j++){
                         cats.add(genres.getString(j));
@@ -242,6 +307,47 @@ public class MainActivity extends General {
         }
     }
 
+    public void updateCategories(){
+        spinnerArray =  new ArrayList<String>();
+        for(Map.Entry<String,Integer> entry : categoriesList.entrySet()) {
+            if (entry.getValue() > 0) {
+                spinnerArray.add(entry.getKey() + " (" + entry.getValue() + ")");
+            }
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, spinnerArray);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        Spinner sItems = (Spinner) findViewById(R.id.categories);
+        sItems.setAdapter(adapter);
+        sItems.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String curCat = spinnerArray.get(position).split(" \\(")[0];
+                if (curCat.equals("All Categories")){
+                    displayList = (ArrayList<Podcast>) subscriptionList;
+                }
+                else {
+                    displayList = new ArrayList<>();
+                    for (int i = 0; i < subscriptionList.size(); i++) {
+                        if (subscriptionList.get(i).getCategories().contains(curCat)) {
+                            displayList.add(subscriptionList.get(i));
+                        }
+                    }
+                    Log.d("PodAntic", Integer.toString(displayList.size()));
+                }
+                podcastAdapter.update(displayList);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        Log.d("PodAntic", spinnerArray.toString());
+    }
+
     @Override
     protected void onPause(){
         super.onPause();
@@ -257,12 +363,23 @@ public class MainActivity extends General {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (serviceBound) {
-            unbindService(serviceConnection);
-            //service is active
-            player.stopSelf();
+    public void cbSetPlay(boolean play){
+        Log.d("PodAntic", "callback");
+        if (play){
+            nowPlayingButton.setImageResource(R.drawable.ic_baseline_pause_24px);
         }
+        else {
+            nowPlayingButton.setImageResource(R.drawable.ic_baseline_play_arrow_24px);
+        }
+    }
+
+    @Override
+    public void cbOnLoad(){
+        //nada
+    }
+
+    @Override
+    public void cbPreLoad(){
+        //nada
     }
 }

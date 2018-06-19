@@ -75,24 +75,72 @@ public class StorageUtil {
         }
     }
 
-    /*
-
-    public void storeAudioIndex(int index) {
+    public void storeFavorites(ArrayList<Episode> arrayList){
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt("audioIndex", index);
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString("favoritesList", json);
         editor.apply();
     }
 
-    public int loadAudioIndex() {
+    public ArrayList<Episode> loadFavorites() {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
-        return preferences.getInt("audioIndex", -1);//return -1 if no data found
+        Gson gson = new Gson();
+        String json = preferences.getString("favoritesList", null);
+        Type type = new TypeToken<ArrayList<Episode>>() {
+        }.getType();
+        if (gson.fromJson(json,type) == null){
+            return new ArrayList<Episode>();
+        }
+        else{
+            return gson.fromJson(json, type);
+        }
     }
 
-    public void clearCachedAudioPlaylist() {
+    public void storeInProgress(ArrayList<Episode> arrayList){
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.clear();
-        editor.commit();
-    }*/
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString("inProgressList", json);
+        editor.apply();
+    }
+
+    public ArrayList<Episode> loadInProgress() {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = preferences.getString("inProgressList", null);
+        Type type = new TypeToken<ArrayList<Episode>>() {
+        }.getType();
+        if (gson.fromJson(json,type) == null){
+            return new ArrayList<Episode>();
+        }
+        else{
+            return gson.fromJson(json, type);
+        }
+    }
+
+    public void storeDownloads(ArrayList<Episode> arrayList){
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString("downloadsList", json);
+        editor.apply();
+    }
+
+    public ArrayList<Episode> loadDownloads() {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = preferences.getString("downloadsList", null);
+        Type type = new TypeToken<ArrayList<Episode>>() {
+        }.getType();
+        if (gson.fromJson(json,type) == null){
+            return new ArrayList<Episode>();
+        }
+        else{
+            return gson.fromJson(json, type);
+        }
+    }
 }

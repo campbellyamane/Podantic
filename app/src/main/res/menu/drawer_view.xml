@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <group  android:id="@+id/my_stuff"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/subscriptions"
+            android:title="My Subscriptions" />
+        <item
+            android:id="@+id/favorites"
+            android:title="My Favorites" />
+        <item
+            android:id="@+id/downloads"
+            android:title="My Downloads" />
+    </group>
+    <group android:id="@+id/other"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/recently_played"
+            android:title="Recently Played" />
+        <item
+            android:id="@+id/in_progress"
+            android:title="Playback in Progress" />
+    </group>
+
+</menu>

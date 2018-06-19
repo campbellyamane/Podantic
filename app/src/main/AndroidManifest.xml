@@ -3,6 +3,8 @@
     package="com.campbellyamane.podantic">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -11,21 +13,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
-        <service android:name=".PodcastService"
-            android:enabled="true"/>
-        <activity android:name=".MainActivity">
+        <service
+            android:name=".PodcastService"
+            android:enabled="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PodHome"
-            android:windowSoftInputMode="adjustResize">
-        </activity>
-        <activity android:name=".NowPlaying"
-            android:configChanges="orientation|keyboardHidden">
-        </activity>
+        <activity
+            android:name=".PodHome"
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
+        <activity
+            android:name=".NowPlaying"
+            android:configChanges="orientation|keyboardHidden" />
+        <activity
+            android:name=".Favorites"
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
+        <activity android:name=".InProgress"
+            android:windowSoftInputMode="stateHidden|adjustNothing" ></activity>
+        <activity android:name=".Downloads"
+            android:windowSoftInputMode="stateHidden|adjustNothing" ></activity>
     </application>
 
 </manifest>
