@@ -19,12 +19,14 @@
 
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden|adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <activity
             android:name=".PodHome"
@@ -50,7 +52,9 @@
             android:name=".LastPlayed"
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden|adjustNothing" />
-        <activity android:name=".Discover"></activity>
+        <activity android:name=".Discover"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden|adjustNothing" ></activity>
     </application>
 
 </manifest>

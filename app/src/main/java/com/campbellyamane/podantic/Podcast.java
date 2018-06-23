@@ -8,12 +8,21 @@ public class Podcast {
     private String mName;
     private String mFeed;
     private ArrayList<String> mCats;
+    private String mArtist;
 
     public Podcast(String art, String name, String feed, ArrayList<String> categories){
         mArt = art;
         mName = name;
         mFeed = feed;
         mCats = categories;
+    }
+
+    public Podcast(String art, String name, String feed, ArrayList<String> categories, String artist){
+        mArt = art;
+        mName = name;
+        mFeed = feed;
+        mCats = categories;
+        mArtist = artist;
     }
 
     public String getArt(){
@@ -34,5 +43,9 @@ public class Podcast {
 
     public void setArt(String art){
         mArt = art;
+    }
+
+    public String getArtist(){
+        return mArtist;
     }
 }

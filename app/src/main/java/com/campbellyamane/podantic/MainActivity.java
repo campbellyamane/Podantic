@@ -116,7 +116,7 @@ public class MainActivity extends General implements PodcastService.Callbacks{
         searchView.setAdapter(adapter);
 
         searchView.addTextChangedListener(new TextWatcher() {
-
+            Timer timer;
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -129,15 +129,29 @@ public class MainActivity extends General implements PodcastService.Callbacks{
 
             @Override
             public void afterTextChanged(Editable s) {
-                try {
-                    ps.cancel(true);
-                } catch (Exception e){
-                    //nothing
-                }
-                String se = s.toString();
-                if (se.length() > 0) {
-                    ps = new podSearch().execute(se);
-                }
+                timer = new Timer();
+                timer.schedule(new TimerTask(){
+                    @Override
+                    public void run() {
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                timer.cancel();
+                                try {
+                                    adapter.clear();
+                                    ps.cancel(true);
+                                } catch (Exception e){
+                                    //nothing
+                                }
+                                String se = s.toString();
+                                if (se.length() > 0) {
+                                    ps = new podSearch().execute(se);
+                                }
+
+                            }
+                        });
+                    }
+                }, 250);
 
             }
         });

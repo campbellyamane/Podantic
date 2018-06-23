@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 public class StorageUtil {
@@ -146,12 +147,6 @@ public class StorageUtil {
 
     public void storeLastPlayed(ArrayList<Episode> arrayList){
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
-        Collections.sort(arrayList, new Comparator<Episode>() {
-            @Override
-            public int compare(Episode e1, Episode e2) {
-                return Long.compare(e1.getLastPlayed(), e2.getLastPlayed());
-            }
-        });
         SharedPreferences.Editor editor = preferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(arrayList);
@@ -171,5 +166,27 @@ public class StorageUtil {
         else{
             return gson.fromJson(json, type);
         }
+    }
+
+    public LinkedHashMap<String, String> loadDiscover(){
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        map.put("All Categories", "26");
+        map.put("Arts", "1301");
+        map.put("Business", "1321");
+        map.put("Comedy", "1303");
+        map.put("Education", "26");
+        map.put("Games & Hobbies", "1323");
+        map.put("Government & Organizations", "1325");
+        map.put("Health", "1307");
+        map.put("Kids & Family", "1305");
+        map.put("Music", "1310");
+        map.put("News & Politics", "1311");
+        map.put("Religion & Spirituality", "1314");
+        map.put("Science & Medicine", "1315");
+        map.put("Society & Culture", "1324");
+        map.put("Sports & Recreation", "1316");
+        map.put("Technology", "1318");
+        map.put("TV & Film", "1309");
+        return map;
     }
 }

@@ -179,6 +179,13 @@ public class General extends AppCompatActivity{
                                 }
                                 break;
 
+                            case R.id.discover:
+                                intent = new Intent(getApplicationContext(), Discover.class);
+                                if (!getSupportActionBar().getTitle().equals("Discover")){
+                                    startActivity(intent);
+                                }
+                                break;
+
                             case R.id.recently_played:
                                 intent = new Intent(getApplicationContext(), LastPlayed.class);
                                 if (!getSupportActionBar().getTitle().equals("Recently Played")){

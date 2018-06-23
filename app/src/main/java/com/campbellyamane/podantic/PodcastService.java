@@ -208,7 +208,10 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         if (requestAudioFocus()) {
             episode = e;
             episode.setLastPlayed(System.currentTimeMillis());
-            lastPlayedList_service.add(episode);
+            if (lastPlayedList_service.contains(episode)){
+                lastPlayedList_service.remove(episode);
+            }
+            lastPlayedList_service.add(0, episode);
             storageUtil.storeLastPlayed(lastPlayedList_service);
 
             try {

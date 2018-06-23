@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="96dp">
+    <ImageView
+        android:id="@+id/podcast_art"
+        android:layout_margin="8dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/black"/>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="96dp">
+        <TextView
+            android:id="@+id/podcast_title"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:text="Episode Name"/>
+        <TextView
+            android:id="@+id/podcast_description"
+            android:ellipsize="end"
+            android:textSize="12sp"
+            android:layout_marginRight="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="8dp"
+            android:text="details..."/>
+    </LinearLayout>
+</LinearLayout>
