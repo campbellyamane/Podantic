@@ -2,30 +2,43 @@ package com.campbellyamane.podantic;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.graphics.Palette;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.IOException;
 
 public class NowPlaying extends General implements PodcastService.Callbacks{
 
+    private LinearLayout whole;
     private RelativeLayout main;
     private ImageView art;
     private TextView details;
@@ -43,6 +56,9 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
     private ProgressDialog dialog;
 
     private ImageButton favorite;
+    private ImageButton more;
+
+    private Boolean createCalled = false;
 
     private static long sinceDown;
     @Override
@@ -52,8 +68,9 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
         setContentView(R.layout.activity_now_playing);
 
         player.registerCallbacks(this);
-
+        createCalled = true;
         {
+            whole = findViewById(R.id.whole_screen);
             main = findViewById(R.id.main_info);
             art = findViewById(R.id.art);
             details = findViewById(R.id.details);
@@ -68,6 +85,25 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
             timeLeft = findViewById(R.id.time_left);
             mHandler = new Handler();
             favorite = findViewById(R.id.favorite);
+            more = findViewById(R.id.more);
+        }
+
+        try{
+            Bundle b = getIntent().getExtras();
+            String check = b.getString("fromNowPlaying");
+            if (player.isPlaying()){
+                playButton.setImageResource(R.drawable.ic_baseline_pause_24px_white);
+            }
+            else{
+                playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24px_white);
+            }
+        } catch (Exception e) {
+            playButton.setImageResource(R.drawable.ic_baseline_pause_24px_white);
+            if (downloadsList.contains(currentEpisode)) {
+                player.playDownloadedMedia(currentEpisode);
+            } else {
+                player.playMedia(currentEpisode);
+            }
         }
 
         favorite.setOnClickListener(new View.OnClickListener() {
@@ -84,11 +120,28 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
             }
         });
 
-
-        Picasso.get().load(currentEpisode.getArt()).fit().centerCrop().into(art);
-        details.setText(currentEpisode.getDetails());
-        title.setText(currentEpisode.getTitle());
-        podcast.setText(currentEpisode.getPodcast());
+        more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(NowPlaying.this, v);
+                popup.getMenuInflater().inflate(R.menu.nowplaying_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Intent intent;
+                        switch (item.getItemId()) {
+                            case R.id.go_to_podcast:
+                                currentPodcast = new Podcast(currentEpisode.getArt(),currentEpisode.getPodcast(),currentEpisode.getAllEpisodes(),currentEpisode.getCategories());
+                                intent = new Intent(getApplicationContext(), PodHome.class);
+                                startActivity(intent);
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                popup.show();
+            }
+        });
 
         main.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,12 +212,12 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
             @Override
             public void onClick(View v) {
                 if (player.isPlaying()){
-                    player.pauseMedia();
                     playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24px_white);
+                    player.pauseMedia();
                 }
                 else{
-                    player.pauseMedia();
                     playButton.setImageResource(R.drawable.ic_baseline_pause_24px_white);
+                    player.pauseMedia();
                 }
             }
         });
@@ -176,26 +229,36 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
         getSupportActionBar().setTitle("Now Playing");
         //Make sure you update Seekbar on UI thread
 
-        if (isInFavorites(currentEpisode)){
-            favorite.setImageResource(R.drawable.ic_baseline_star_24px);
-        }
-
-        try{
-            Bundle b = getIntent().getExtras();
-            String check = b.getString("fromNowPlaying");
-            if (player.isPlaying()){
+        if (!createCalled) {
+            if (player.isPlaying()) {
                 playButton.setImageResource(R.drawable.ic_baseline_pause_24px_white);
-            }
-            else{
+            } else {
                 playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24px_white);
             }
-        } catch (Exception e) {
-            playButton.setImageResource(R.drawable.ic_baseline_pause_24px_white);
-            if (downloadsList.contains(currentEpisode)) {
-                player.playDownloadedMedia(currentEpisode);
-            } else {
-                player.playMedia(currentEpisode);
+        }
+        createCalled = false;
+
+        Picasso.get().load(currentEpisode.getArt()).fit().centerCrop().into(art, new Callback() {
+            @Override
+            public void onSuccess() {
+                themeColor = Palette.from(((BitmapDrawable) art.getDrawable()).getBitmap()).generate().getDominantSwatch().getRgb();
+                GradientDrawable gd = new GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        new int[] {themeColor,0x000000});
+                gd.setCornerRadius(0f);
+                whole.setBackground(gd);
             }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
+        details.setText(currentEpisode.getDetails());
+        title.setText(currentEpisode.getTitle());
+        podcast.setText(currentEpisode.getPodcast());
+        if (isInFavorites(currentEpisode)){
+            favorite.setImageResource(R.drawable.ic_baseline_star_24px);
         }
 
         this.runOnUiThread(new Runnable() {
@@ -271,6 +334,5 @@ public class NowPlaying extends General implements PodcastService.Callbacks{
         super.onBackPressed();
         overridePendingTransition(R.anim.stay, R.anim.slide_out_from_top);
     }
-
 
 }

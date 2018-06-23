@@ -278,7 +278,7 @@ public class PodHome extends General implements PodcastService.Callbacks{
                     Element enc = (Element) e.getElementsByTagName("enclosure").item(0);
                     String eMp3 = enc.getAttribute("url");
 
-                    episodes.add(new Episode(eTitle, eDate, eDetails, eMp3, eArt, eTime, title.getTextContent()));
+                    episodes.add(new Episode(eTitle, eDate, eDetails, eMp3, eArt, eTime, title.getTextContent(), currentPodcast.getFeed(), currentPodcast.getCategories()));
                 }
                 catch (Exception ex){
                     ex.printStackTrace();
@@ -376,13 +376,6 @@ public class PodHome extends General implements PodcastService.Callbacks{
         });
 
         lpMenu.show();
-    }
-
-    public Palette createPaletteSync() {
-        BitmapDrawable drawable = (BitmapDrawable) img.getDrawable();
-        Bitmap bitmap = drawable.getBitmap();
-        Palette p = Palette.from(bitmap).generate();
-        return p;
     }
 
     @Override

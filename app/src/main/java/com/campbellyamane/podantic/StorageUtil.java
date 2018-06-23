@@ -28,7 +28,7 @@ public class StorageUtil {
         Collections.sort(arrayList, new Comparator<Podcast>() {
             @Override
             public int compare(Podcast p1, Podcast p2) {
-                return p1.getName().compareTo(p2.getName());
+                return p1.getName().replace("The ", "").compareTo(p2.getName().replace("The ", ""));
             }
         });
         SharedPreferences.Editor editor = preferences.edit();
@@ -134,6 +134,35 @@ public class StorageUtil {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = preferences.getString("downloadsList", null);
+        Type type = new TypeToken<ArrayList<Episode>>() {
+        }.getType();
+        if (gson.fromJson(json,type) == null){
+            return new ArrayList<Episode>();
+        }
+        else{
+            return gson.fromJson(json, type);
+        }
+    }
+
+    public void storeLastPlayed(ArrayList<Episode> arrayList){
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        Collections.sort(arrayList, new Comparator<Episode>() {
+            @Override
+            public int compare(Episode e1, Episode e2) {
+                return Long.compare(e1.getLastPlayed(), e2.getLastPlayed());
+            }
+        });
+        SharedPreferences.Editor editor = preferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString("lastPlayedList", json);
+        editor.apply();
+    }
+
+    public ArrayList<Episode> loadLastPlayed() {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = preferences.getString("lastPlayedList", null);
         Type type = new TypeToken<ArrayList<Episode>>() {
         }.getType();
         if (gson.fromJson(json,type) == null){

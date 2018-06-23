@@ -4,6 +4,7 @@ import android.text.Html;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Episode{
@@ -15,10 +16,12 @@ public class Episode{
     private String mArt;
     private String mTime;
     private String mPod;
+    private String mUrl;
+    private ArrayList<String> mCats;
     private long mLastPlayed;
     private int mPosition;
 
-    public Episode(String title, String date, String details, String mp3, String art, String time, String pod){
+    public Episode(String title, String date, String details, String mp3, String art, String time, String pod, String podUrl, ArrayList<String> cats){
         mTitle = title;
         mDate = date.substring(0,16);
         mDetails = Html.fromHtml(details).toString();
@@ -38,6 +41,8 @@ public class Episode{
         mPod = pod;
         mLastPlayed = System.currentTimeMillis();
         mPosition = 0;
+        mUrl = podUrl;
+        mCats = cats;
     }
     public String getPodcast(){ return mPod; }
     public String getTitle(){
@@ -70,6 +75,14 @@ public class Episode{
 
     public int getPosition(){
         return mPosition;
+    }
+
+    public String getAllEpisodes(){
+        return mUrl;
+    }
+
+    public ArrayList<String> getCategories(){
+        return mCats;
     }
 
     public void setLastPlayed(long lp){

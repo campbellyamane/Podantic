@@ -44,7 +44,7 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         AudioManager.OnAudioFocusChangeListener {
 
     private static MediaPlayer pp;
-    private static Episode episode = new Episode("", "49731298537982742984232", "", "", "", "0", "");
+    private static Episode episode = new Episode("", "49731298537982742984232", "", "", "", "0", "", "", new ArrayList<String>());
     private static Bitmap bitmap;
 
     //Used to pause/resume MediaPlayer
@@ -83,6 +83,7 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     //Util
     private static StorageUtil storageUtil;
     private static ArrayList<Episode> inProgressList_service;
+    private static ArrayList<Episode> lastPlayedList_service;
 
     @Override
     public void onAudioFocusChange(int focusState) {
@@ -192,17 +193,24 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         activity.cbPreLoad();
         try {
             if (!episode.getMp3().equals("")) {
-                inProgressList_service.get(inProgressList_service.indexOf(episode)).setPosition(pp.getCurrentPosition());
+                int index = inProgressList_service.indexOf(episode);
+                episode.setPosition(pp.getCurrentPosition());
+                inProgressList_service.remove(index);
+                inProgressList_service.add(0, episode);
             }
         }catch (Exception ex) {
             episode.setPosition(pp.getCurrentPosition());
-            inProgressList_service.add(episode);
+            inProgressList_service.add(0, episode);
         }
         storageUtil.storeInProgress(inProgressList_service);
         inProgressList_service = storageUtil.loadInProgress();
 
         if (requestAudioFocus()) {
             episode = e;
+            episode.setLastPlayed(System.currentTimeMillis());
+            lastPlayedList_service.add(episode);
+            storageUtil.storeLastPlayed(lastPlayedList_service);
+
             try {
                 //Reset so that the MediaPlayer is not pointing to another data source
                 pp.reset();
@@ -237,14 +245,16 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
 
         try {
             if (!episode.getMp3().equals("")) {
-                inProgressList_service.get(inProgressList_service.indexOf(episode)).setPosition(pp.getCurrentPosition());
+                int index = inProgressList_service.indexOf(episode);
+                episode.setPosition(pp.getCurrentPosition());
+                inProgressList_service.remove(index);
+                inProgressList_service.add(0, episode);
             }
         }catch (Exception ex) {
             episode.setPosition(pp.getCurrentPosition());
-            inProgressList_service.add(episode);
+            inProgressList_service.add(0, episode);
         }
         storageUtil.storeInProgress(inProgressList_service);
-        inProgressList_service = storageUtil.loadInProgress();
 
         if (requestAudioFocus()) {
             episode = e;
@@ -289,13 +299,15 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     public void pauseMedia() {
         if (pp.isPlaying()) {
             try{
-                inProgressList_service.get(inProgressList_service.indexOf(episode)).setPosition(pp.getCurrentPosition());
+                int index = inProgressList_service.indexOf(episode);
+                episode.setPosition(pp.getCurrentPosition());
+                inProgressList_service.remove(index);
+                inProgressList_service.add(0, episode);
             } catch (Exception e){
                 episode.setPosition(pp.getCurrentPosition());
-                inProgressList_service.add(episode);
+                inProgressList_service.add(0, episode);
             }
             storageUtil.storeInProgress(inProgressList_service);
-            inProgressList_service = storageUtil.loadInProgress();
 
             pp.pause();
             removeAudioFocus();
@@ -347,7 +359,6 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         try{
             inProgressList_service.remove(episode);
             storageUtil.storeInProgress(inProgressList_service);
-            inProgressList_service = storageUtil.loadInProgress();
         } catch (Exception e){
             //nada
         }
@@ -398,7 +409,6 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
                     //nada
                 }
                 storageUtil.storeInProgress(inProgressList_service);
-                inProgressList_service = storageUtil.loadInProgress();
             }
         });
         pp = mp;
@@ -428,6 +438,7 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     public int onStartCommand(Intent intent, int flags, int startId) {
         storageUtil = new StorageUtil(this);
         inProgressList_service = storageUtil.loadInProgress();
+        lastPlayedList_service = storageUtil.loadLastPlayed();
         initMediaPlayer();
         try {
             initMediaSession();

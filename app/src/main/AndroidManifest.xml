@@ -3,8 +3,8 @@
     package="com.campbellyamane.podantic">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -28,17 +28,29 @@
         </activity>
         <activity
             android:name=".PodHome"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden|adjustNothing" />
         <activity
             android:name=".NowPlaying"
-            android:configChanges="orientation|keyboardHidden" />
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleTask" />
         <activity
             android:name=".Favorites"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden|adjustNothing" />
-        <activity android:name=".InProgress"
-            android:windowSoftInputMode="stateHidden|adjustNothing" ></activity>
-        <activity android:name=".Downloads"
-            android:windowSoftInputMode="stateHidden|adjustNothing" ></activity>
+        <activity
+            android:name=".InProgress"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
+        <activity
+            android:name=".Downloads"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
+        <activity
+            android:name=".LastPlayed"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden|adjustNothing" />
+        <activity android:name=".Discover"></activity>
     </application>
 
 </manifest>

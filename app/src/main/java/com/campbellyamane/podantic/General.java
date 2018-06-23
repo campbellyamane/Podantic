@@ -87,6 +87,7 @@ public class General extends AppCompatActivity{
     public static ArrayList<Podcast> displayList;
     public static ArrayList<Episode> favoritesList;
     public static ArrayList<Episode> downloadsList;
+    public static ArrayList<Episode> lastPlayedList;
     public static TreeMap<String, Integer> categoriesList;
     public static boolean serviceBound = false;
 
@@ -104,6 +105,8 @@ public class General extends AppCompatActivity{
     public static TextView lpFavorite;
     public static TextView lpDownload;
 
+    public static int themeColor = 0;
+
     @Override
     protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +119,7 @@ public class General extends AppCompatActivity{
         favoritesList = storageUtil.loadFavorites();
         categoriesList = storageUtil.loadCategories();
         downloadsList = storageUtil.loadDownloads();
+        lastPlayedList = storageUtil.loadLastPlayed();
     }
 
     @Override
@@ -168,16 +172,23 @@ public class General extends AppCompatActivity{
                                 }
                                 break;
 
-                            case R.id.in_progress:
-                                intent = new Intent(getApplicationContext(), InProgress.class);
-                                if (!getSupportActionBar().getTitle().equals("Playback in Progress")){
+                            case R.id.downloads:
+                                intent = new Intent(getApplicationContext(), Downloads.class);
+                                if (!getSupportActionBar().getTitle().equals("My Downloads")){
                                     startActivity(intent);
                                 }
                                 break;
 
-                            case R.id.downloads:
-                                intent = new Intent(getApplicationContext(), Downloads.class);
-                                if (!getSupportActionBar().getTitle().equals("My Downloads")){
+                            case R.id.recently_played:
+                                intent = new Intent(getApplicationContext(), LastPlayed.class);
+                                if (!getSupportActionBar().getTitle().equals("Recently Played")){
+                                    startActivity(intent);
+                                }
+                                break;
+
+                            case R.id.in_progress:
+                                intent = new Intent(getApplicationContext(), InProgress.class);
+                                if (!getSupportActionBar().getTitle().equals("Playback in Progress")){
                                     startActivity(intent);
                                 }
                                 break;

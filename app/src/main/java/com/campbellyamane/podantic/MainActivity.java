@@ -115,6 +115,32 @@ public class MainActivity extends General implements PodcastService.Callbacks{
         searchView.setDropDownBackgroundResource(R.color.black);
         searchView.setAdapter(adapter);
 
+        searchView.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    ps.cancel(true);
+                } catch (Exception e){
+                    //nothing
+                }
+                String se = s.toString();
+                if (se.length() > 0) {
+                    ps = new podSearch().execute(se);
+                }
+
+            }
+        });
         //start single podcast activity on click
         searchView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -195,37 +221,10 @@ public class MainActivity extends General implements PodcastService.Callbacks{
                 return true;
             }
         });
-
-        searchView.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                try {
-                    ps.cancel(true);
-                } catch (Exception e){
-                    //nothing
-                }
-                String se = s.toString();
-                if (se.length() > 0) {
-                    ps = new podSearch().execute(se);
-                }
-
-            }
-        });
     }
 
     public class podSearch extends AsyncTask<String, String, String> {
-        String url1 = "http://itunes.apple.com/search?entity=podcast&limit=5&sort=popularity&term=";
+        String url1 = "https://itunes.apple.com/search?entity=podcast&limit=5&sort=popularity&term=";
         String mp3 = "";
         String title = "";
         @Override
