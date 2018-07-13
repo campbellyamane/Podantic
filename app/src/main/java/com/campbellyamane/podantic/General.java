@@ -364,8 +364,8 @@ public class General extends AppCompatActivity{
     }
 
     @Override
-    protected void onDestroy(){
-        super.onDestroy();
+    protected void onPause(){
+        super.onPause();
         PodcastService.isBound = false;
     }
 }

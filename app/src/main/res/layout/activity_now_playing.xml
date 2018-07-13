@@ -10,7 +10,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
     <LinearLayout
-        android:id="@+id/whole_screen"
         android:background="@color/black"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -45,14 +44,13 @@
         </android.support.v7.widget.Toolbar>
         <RelativeLayout
             android:id="@+id/main_info"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="32dp"
             android:layout_gravity="center"
-            android:layout_width="256dp"
-            android:layout_height="256dp">
+            android:layout_width="378dp"
+            android:layout_height="378dp">
             <ImageView
                 android:id="@+id/art"
                 android:alpha="1"
+                android:src="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
             <TextView
@@ -66,6 +64,7 @@
                 android:layout_height="match_parent"/>
         </RelativeLayout>
         <LinearLayout
+            android:id="@+id/whole_screen"
             android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
@@ -102,7 +101,7 @@
             <LinearLayout
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="4dp"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -128,7 +127,7 @@
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
-                android:layout_height="96dp">
+                android:layout_height="64dp">
                 <ImageButton
                     android:id="@+id/prev"
                     android:src="@drawable/ic_baseline_skip_previous_24px_white"

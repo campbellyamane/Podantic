@@ -20,7 +20,7 @@
             android:layout_marginTop="8dp"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="24dp"
             android:text="Episode Name"/>
         <TextView
@@ -28,7 +28,7 @@
             android:ellipsize="end"
             android:textSize="12sp"
             android:layout_marginRight="8dp"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_marginBottom="8dp"
             android:text="details..."/>

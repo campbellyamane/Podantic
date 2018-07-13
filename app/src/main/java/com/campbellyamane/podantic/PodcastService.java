@@ -5,8 +5,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -84,6 +86,26 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
     private static StorageUtil storageUtil;
     private static ArrayList<Episode> inProgressList_service;
     private static ArrayList<Episode> lastPlayedList_service;
+
+    private boolean headsetConnected = false;
+    //pause on headphones removed
+    private class HeadSetReceiver extends BroadcastReceiver {
+        @Override public void onReceive(Context context, Intent intent) {
+            if (intent.hasExtra("state") && !episode.getTitle().equals("")){
+                if (headsetConnected && intent.getIntExtra("state", 0) == 0){
+                    headsetConnected = false;
+                    if (isPlaying()){
+                        pauseMedia();
+                    }
+                } else if (!headsetConnected && intent.getIntExtra("state", 0) == 1){
+                    headsetConnected = true;
+                    if (!isPlaying()){
+                        pauseMedia();
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public void onAudioFocusChange(int focusState) {
@@ -261,6 +283,12 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
 
         if (requestAudioFocus()) {
             episode = e;
+            episode.setLastPlayed(System.currentTimeMillis());
+            if (lastPlayedList_service.contains(episode)){
+                lastPlayedList_service.remove(episode);
+            }
+            lastPlayedList_service.add(0, episode);
+            storageUtil.storeLastPlayed(lastPlayedList_service);
             File path = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PODCASTS);
             String file = new File(path, e.getMp3().hashCode() + ".mp3").getAbsolutePath();
@@ -449,6 +477,10 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
             e.printStackTrace();
         }
         handleIncomingActions(intent);
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(new HeadSetReceiver(), filter);
+
         return super.onStartCommand(intent, flags, START_NOT_STICKY);
     }
 

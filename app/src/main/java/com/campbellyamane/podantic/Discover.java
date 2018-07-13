@@ -63,6 +63,7 @@ public class Discover extends General implements PodcastService.Callbacks {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discover);
+        overridePendingTransition(R.anim.slide_in_from_right,R.anim.slide_out_from_right);
 
         discoverCats = storageUtil.loadDiscover();
 
