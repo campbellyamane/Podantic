@@ -222,9 +222,8 @@ public class General extends AppCompatActivity{
                 startActivity(i);
             }
         });
-
         try {
-            if (player.exists() && player.getPlaying().getMp3() != "") {
+            if (player.exists()) {
                 nowPlayingTitle.setSelected(true);
                 nowPlayingButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -364,8 +363,8 @@ public class General extends AppCompatActivity{
     }
 
     @Override
-    protected void onPause(){
-        super.onPause();
+    protected void onDestroy(){
+        super.onDestroy();
         PodcastService.isBound = false;
     }
 }

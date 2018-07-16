@@ -199,6 +199,10 @@ public class PodcastService extends Service implements MediaPlayer.OnCompletionL
         return episode;
     }
 
+    public void setPlaying(Episode ep){
+        episode = ep;
+    }
+
     public void playMedia(Episode e) {
         synced = false;
         try{

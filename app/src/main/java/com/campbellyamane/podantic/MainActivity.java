@@ -84,6 +84,8 @@ public class MainActivity extends General implements PodcastService.Callbacks{
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             PodcastService.LocalBinder binder = (PodcastService.LocalBinder) service;
             player = binder.getService();
+            //player.setPlaying(lastPlayedList.get(0));
+
             serviceBound = true;
 
         }
